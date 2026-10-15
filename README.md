@@ -22,7 +22,7 @@ smartgas/
 ├── web/              # React 18, TypeScript, Vite, PWA installable, Tailwind CSS
 ├── backend/          # Optionnel : Mosquitto MQTT TLS, FastAPI, TimescaleDB, Docker Compose
 ├── shared/           # Tokens de design partagés (Bleu/Or), schémas et simulateur
-├── docs/             # Documentation d'API OpenAPI, schéma de câblage, étalonnage, roadmap
+├── docs/             # Documentation : guide de connexion ESP32, API OpenAPI, câblage, étalonnage
 └── README.md
 ```
 
@@ -127,6 +127,8 @@ pio device monitor -b 115200
 ```
 
 Au démarrage, l'ESP32 tente de se connecter au Wi-Fi. S'il n'est pas configuré, il crée automatiquement le point d'accès Wi-Fi **`SmartGas-Setup`** (mot de passe : `smartgas123`). Connectez-vous dessus pour renseigner votre SSID résidentiel via le portail captif.
+
+> 📖 **Guide Dédié Pas à Pas** : Consultez le guide complet de connexion Wi-Fi et d'appairage par code PIN physique : [`docs/guide_connexion_esp32.md`](file:///home/t-k-f-d-m/Documents/MonGaz/docs/guide_connexion_esp32.md).
 
 ---
 
