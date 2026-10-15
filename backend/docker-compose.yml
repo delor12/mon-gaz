@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # 1. Broker MQTT Mosquitto
+  mosquitto:
+    image: eclipse-mosquitto:2.0.18
+    container_name: smartgas-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  # 2. Base de Données Séries Temporelles TimescaleDB (PostgreSQL 16)
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: smartgas-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: smartgas
+      POSTGRES_USER: smartgas_admin
+      POSTGRES_PASSWORD: smartgas_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgas_admin -d smartgas"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. Serveur Backend FastAPI + Ingestion MQTT
+  backend:
+    build: .
+    container_name: smartgas-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://smartgas_admin:smartgas_secure_password_2026@db:5432/smartgas
+      SYNC_DATABASE_URL: postgresql://smartgas_admin:smartgas_secure_password_2026@db:5432/smartgas
+      MQTT_BROKER_HOST: mosquitto
+      MQTT_BROKER_PORT: 1883
+      JWT_SECRET: sg_jwt_secret_super_secure_key_change_in_production_2026
+      CORS_ORIGINS: "*"
+      FCM_SERVER_KEY: ""
+    depends_on:
+      db:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  postgres_data:

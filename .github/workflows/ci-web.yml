@@ -1,0 +1,36 @@
+name: CI Web React PWA
+
+on:
+  push:
+    paths:
+      - 'web/**'
+      - 'shared/**'
+      - '.github/workflows/ci-web.yml'
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'shared/**'
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'web/package.json'
+
+      - name: Install dependencies
+        run: |
+          cd web
+          npm install
+
+      - name: Build React PWA
+        run: |
+          cd web
+          npm run build

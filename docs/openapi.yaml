@@ -1,0 +1,594 @@
+openapi: 3.0.3
+info:
+  title: SmartGas ESP32 Embedded API & WebSocket
+  version: 1.0.0
+  description: |
+    API REST et flux WebSocket du dispositif connecté SmartGas.
+    Permet la télémétrie en temps réel (1 Hz), la configuration de la cellule de charge HX711,
+    l'étalonnage, la détection des fuites de gaz GPL, et le contrôle sécurisé de l'électrovanne.
+servers:
+  - url: http://smartgas.local/api/v1
+    description: Hôte local par défaut via mDNS
+  - url: http://{device_ip}/api/v1
+    description: Hôte local par IP directe
+    variables:
+      device_ip:
+        default: 192.168.1.50
+        description: Adresse IP assignée par DHCP à l'ESP32
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/pair:
+    post:
+      summary: Appairage initial avec code PIN affiché sur le TFT
+      description: |
+        Valide le code PIN à 6 chiffres affiché sur l'écran TFT physique de l'appareil.
+        Renvoie un jeton d'authentification Bearer persistant pour autoriser les actions de contrôle.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pin_code, client_name]
+              properties:
+                pin_code:
+                  type: string
+                  example: "482910"
+                  pattern: "^[0-9]{6}$"
+                client_name:
+                  type: string
+                  example: "Pixel 8 Pro (Kevin)"
+      responses:
+        '200':
+          description: Appairage réussi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "sg_sec_9f81a7b3c2d4e5f601a2"
+                  device_id:
+                    type: string
+                    example: "ESP32-SMARTGAS-8A4F"
+                  expires_in_days:
+                    type: integer
+                    example: 365
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorized'
+        '429':
+          $ref: '#/components/responses/ErrorTooManyRequests'
+
+  /data:
+    get:
+      summary: Télémétrie instantanée courante
+      description: Renvoie l'état complet actuel des capteurs, du niveau de gaz et du système.
+      security: []
+      responses:
+        '200':
+          description: Données télémétriques
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryData'
+
+  /history:
+    get:
+      summary: Historique de consommation de gaz
+      description: Récupère les points d'historique enregistrés en mémoire flash LittleFS / NVS.
+      security: []
+      parameters:
+        - name: range
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: day
+          description: Plage temporelle demandée
+        - name: resolution
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [minute, hour, day]
+            default: hour
+          description: Fréquence d'agrégation des points
+      responses:
+        '200':
+          description: Points d'historique agrégés
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  range:
+                    type: string
+                    example: "day"
+                  resolution:
+                    type: string
+                    example: "hour"
+                  count:
+                    type: integer
+                    example: 24
+                  points:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HistoryPoint'
+
+  /tare:
+    post:
+      summary: Réinitialisation du zéro (Tare de la cellule HX711)
+      description: |
+        Définit le poids actuel du plateau vide comme étant le 0 kg.
+        Nécessite que le plateau soit totalement dégagé.
+      responses:
+        '200':
+          description: Tare effectuée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  tare_offset:
+                    type: integer
+                    example: 8432190
+                  message:
+                    type: string
+                    example: "Tare calibrated successfully"
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorized'
+
+  /calibrate:
+    post:
+      summary: Étalonnage de la balance avec une masse étalon connue
+      description: |
+        Après avoir effectué la tare, poser un poids connu (ex: 5.0 kg) et envoyer sa valeur.
+        L'ESP32 calcule le nouveau facteur d'échelle et le sauvegarde en mémoire NVS.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [known_weight_kg]
+              properties:
+                known_weight_kg:
+                  type: number
+                  format: float
+                  minimum: 0.5
+                  maximum: 50.0
+                  example: 5.0
+      responses:
+        '200':
+          description: Étalonnage réussi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  calibration_factor:
+                    type: number
+                    format: float
+                    example: -22450.5
+                  measured_weight_kg:
+                    type: number
+                    format: float
+                    example: 5.002
+        '400':
+          $ref: '#/components/responses/ErrorBadRequest'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorized'
+
+  /config:
+    get:
+      summary: Lecture de la configuration actuelle de la bouteille et des seuils
+      security: []
+      responses:
+        '200':
+          description: Configuration du système
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceConfig'
+
+    put:
+      summary: Mise à jour des paramètres de la bouteille, seuils et relais
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceConfig'
+      responses:
+        '200':
+          description: Configuration mise à jour et persistée en NVS
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  updated_config:
+                    $ref: '#/components/schemas/DeviceConfig'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequest'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorized'
+
+  /alarm/mute:
+    post:
+      summary: Coupure temporaire du buzzer sonore (Mute)
+      description: |
+        Éteint le buzzer pour une durée définie (ex: 120 secondes).
+        Si la fuite de gaz persiste au-delà de cette durée, le buzzer se réactive automatiquement.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                duration_seconds:
+                  type: integer
+                  minimum: 10
+                  maximum: 600
+                  default: 120
+      responses:
+        '200':
+          description: Buzzer mis en sourdine
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  muted:
+                    type: boolean
+                    example: true
+                  mute_remaining_seconds:
+                    type: integer
+                    example: 120
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorized'
+
+  /valve/control:
+    post:
+      summary: Contrôle manuel de l'électrovanne de sécurité
+      description: |
+        Permet d'ouvrir ou fermer l'électrovanne de sécurité.
+        ATTENTION : Si une fuite de gaz est détectée en direct (`leak == true`),
+        le système refusera catégoriquement l'ouverture de l'électrovanne.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [OPEN, CLOSE]
+                  example: "CLOSE"
+      responses:
+        '200':
+          description: État de l'électrovanne mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valve_state:
+                    type: string
+                    enum: [OPEN, CLOSED]
+                    example: "CLOSED"
+                  auto_cutoff_active:
+                    type: boolean
+                    example: false
+        '403':
+          description: Refus de sécurité (fuite de gaz active interdisant l'ouverture)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorized'
+
+  /system/info:
+    get:
+      summary: Informations d'état système, Wi-Fi et matériel
+      security: []
+      responses:
+        '200':
+          description: Métriques matérielles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemInfo'
+
+  /system/reboot:
+    post:
+      summary: Redémarrage sécurisé de l'ESP32
+      description: Ferme les fichiers LittleFS, coupe les relais et redémarre l'ESP32 via ESP.restart().
+      responses:
+        '200':
+          description: Commande de redémarrage acceptée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rebooting:
+                    type: boolean
+                    example: true
+                  delay_ms:
+                    type: integer
+                    example: 1000
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+
+  schemas:
+    TelemetryData:
+      type: object
+      required:
+        - device_id
+        - weight_kg
+        - gross_weight_kg
+        - level_percent
+        - gas_ppm
+        - leak
+        - temperature_c
+        - rssi
+        - uptime_s
+        - firmware
+        - timestamp
+      properties:
+        device_id:
+          type: string
+          example: "ESP32-SMARTGAS-8A4F"
+        weight_kg:
+          type: number
+          format: float
+          description: Poids net de gaz GPL restant (kg)
+          example: 8.420
+        gross_weight_kg:
+          type: number
+          format: float
+          description: Poids brut mesuré sur le plateau (bouteille + gaz) (kg)
+          example: 21.420
+        level_percent:
+          type: number
+          format: float
+          description: Pourcentage de remplissage net restant [0.0 - 100.0]
+          example: 67.3
+        gas_ppm:
+          type: integer
+          description: Concentration de GPL/fumée mesurée par le capteur MQ (ppm)
+          example: 145
+        leak:
+          type: boolean
+          description: Vrai si la concentration de gaz dépasse le seuil d'alarme
+          example: false
+        temperature_c:
+          type: number
+          format: float
+          description: Température ambiante mesurée (°C)
+          example: 21.8
+        humidity_percent:
+          type: number
+          format: float
+          description: Humidité relative (%)
+          example: 48.5
+        valve_state:
+          type: string
+          enum: [OPEN, CLOSED, DISABLED]
+          example: "OPEN"
+        buzzer_muted:
+          type: boolean
+          example: false
+        sensor_fault:
+          type: boolean
+          description: Vrai si le capteur de gaz MQ ou la cellule HX711 est déconnecté
+          example: false
+        rssi:
+          type: integer
+          description: Puissance du signal Wi-Fi en dBm
+          example: -64
+        uptime_s:
+          type: integer
+          description: Temps de fonctionnement depuis le dernier boot en secondes
+          example: 86420
+        firmware:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: integer
+          description: Timestamp Unix UTC (ou millis depuis boot si non NTP)
+          example: 1792004400
+
+    HistoryPoint:
+      type: object
+      required:
+        - timestamp
+        - weight_kg
+        - consumption_kg
+      properties:
+        timestamp:
+          type: integer
+          example: 1791997200
+        weight_kg:
+          type: number
+          format: float
+          example: 8.520
+        consumption_kg:
+          type: number
+          format: float
+          example: 0.100
+
+    DeviceConfig:
+      type: object
+      required:
+        - bottle_type
+        - capacity_kg
+        - tare_weight_kg
+        - leak_threshold_ppm
+        - low_level_threshold_percent
+        - buzzer_enabled
+        - valve_enabled
+      properties:
+        bottle_type:
+          type: string
+          enum: [B6, B12_5, B35, CUSTOM]
+          example: "B12_5"
+        bottle_name:
+          type: string
+          example: "Cuisine Principale"
+        capacity_kg:
+          type: number
+          format: float
+          description: Charge nette nominale de gaz (ex: 12.5 kg)
+          example: 12.5
+        tare_weight_kg:
+          type: number
+          format: float
+          description: Poids de la bouteille vide à vide / tare constructeur (kg)
+          example: 13.0
+        leak_threshold_ppm:
+          type: integer
+          description: Seuil de déclenchement de l'alarme fuite de gaz (ppm)
+          default: 400
+          example: 400
+        low_level_threshold_percent:
+          type: number
+          format: float
+          description: Seuil d'alerte niveau bas (%)
+          default: 15.0
+          example: 15.0
+        critical_level_threshold_percent:
+          type: number
+          format: float
+          description: Seuil d'alerte critique niveau très bas (%)
+          default: 5.0
+          example: 5.0
+        buzzer_enabled:
+          type: boolean
+          default: true
+          example: true
+        valve_enabled:
+          type: boolean
+          description: Activation du pilotage matériel de l'électrovanne
+          default: false
+          example: false
+        valve_auto_cutoff:
+          type: boolean
+          description: Coupe automatiquement l'électrovanne si leak == true
+          default: true
+          example: true
+        mqtt_enabled:
+          type: boolean
+          default: false
+          example: true
+        mqtt_broker:
+          type: string
+          example: "broker.smartgas.io"
+        mqtt_port:
+          type: integer
+          default: 8883
+          example: 8883
+
+    SystemInfo:
+      type: object
+      properties:
+        device_id:
+          type: string
+          example: "ESP32-SMARTGAS-8A4F"
+        firmware_version:
+          type: string
+          example: "1.0.0"
+        chip_model:
+          type: string
+          example: "ESP32-D0WD-V3"
+        chip_cores:
+          type: integer
+          example: 2
+        cpu_freq_mhz:
+          type: integer
+          example: 240
+        free_heap_bytes:
+          type: integer
+          example: 168420
+        min_free_heap_bytes:
+          type: integer
+          example: 142100
+        fs_used_bytes:
+          type: integer
+          example: 286720
+        fs_total_bytes:
+          type: integer
+          example: 1441792
+        wifi_ssid:
+          type: string
+          example: "Livebox-5B20"
+        wifi_ip:
+          type: string
+          example: "192.168.1.50"
+        wifi_mac:
+          type: string
+          example: "30:AE:A4:8A:4F:2C"
+        wifi_rssi:
+          type: integer
+          example: -64
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "LEAK_ACTIVE_VALVE_LOCKED"
+        message:
+          type: string
+          example: "Action rejected: Cannot open valve while gas leak is actively detected."
+        details:
+          type: object
+          nullable: true
+
+  responses:
+    ErrorBadRequest:
+      description: Requête mal formée ou paramètre invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ErrorUnauthorized:
+      description: Jeton Bearer manquant ou invalide
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ErrorTooManyRequests:
+      description: Trop de tentatives d'authentification infructueuses
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

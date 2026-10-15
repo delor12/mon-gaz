@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART GAS - Moniteur de Gaz GPL</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <span class="logo-icon">🔥</span>
+            <div>
+                <h1 class="logo-title">SMART GAS</h1>
+                <p class="logo-sub">Moniteur Intelligent GPL</p>
+            </div>
+        </div>
+        <div class="header-status">
+            <span id="conn-pill" class="status-pill offline">Connexion...</span>
+            <button id="btn-theme-toggle" class="btn-icon" title="Mode Sombre/Clair">🌓</button>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Bandeau d'alerte critique masqué par défaut -->
+        <section id="alert-banner" class="alert-banner hidden">
+            <div class="alert-content">
+                <span class="alert-icon">⚠️</span>
+                <div>
+                    <h2 class="alert-title">ALERTE FUITE DE GAZ DÉTECTÉE !</h2>
+                    <p class="alert-msg">Électrovanne coupée. Fermez le robinet de la bouteille, ne touchez à aucun interrupteur et aérez grandement.</p>
+                </div>
+            </div>
+            <div class="alert-actions">
+                <button id="btn-mute-alarm" class="btn btn-warning">Sourdine Buzzer (2 min)</button>
+            </div>
+        </section>
+
+        <!-- Carte Principale Jauge & Poids -->
+        <section class="card gauge-card">
+            <div class="gauge-wrapper">
+                <svg class="circular-gauge" viewBox="0 0 200 200">
+                    <circle class="gauge-bg" cx="100" cy="100" r="85"></circle>
+                    <circle id="gauge-fill" class="gauge-bar" cx="100" cy="100" r="85"></circle>
+                </svg>
+                <div class="gauge-center">
+                    <span id="txt-level-percent" class="level-percent">--.- %</span>
+                    <span id="txt-net-weight" class="net-weight">--.-- kg</span>
+                    <span class="weight-label">Gaz restant</span>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <span class="metric-label">Poids Brut Total</span>
+                    <span id="txt-gross-weight" class="metric-val">--.-- kg</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Concentration GPL</span>
+                    <span id="txt-gas-ppm" class="metric-val">-- ppm</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Température</span>
+                    <span id="txt-temp" class="metric-val">--.- °C</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Électrovanne</span>
+                    <span id="txt-valve-state" class="metric-val">--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contrôles Rapides & Électrovanne -->
+        <section class="card actions-card">
+            <h3 class="card-title">Contrôles Rapides</h3>
+            <div class="buttons-row">
+                <button id="btn-tare" class="btn btn-secondary">Effectuer la Tare (0 kg)</button>
+                <button id="btn-toggle-valve" class="btn btn-primary">Fermer Électrovanne</button>
+            </div>
+        </section>
+
+        <!-- Zone Calibration et Configuration -->
+        <section class="card config-card">
+            <h3 class="card-title">Configuration Bouteille</h3>
+            <div class="config-grid">
+                <div class="form-group">
+                    <label>Capacité Nominale (kg)</label>
+                    <input type="number" id="input-cap-kg" step="0.5" value="12.5">
+                </div>
+                <div class="form-group">
+                    <label>Poids Bouteille Vide (Tare kg)</label>
+                    <input type="number" id="input-tare-kg" step="0.5" value="13.0">
+                </div>
+                <div class="form-group">
+                    <label>Seuil Alerte Fuite (ppm)</label>
+                    <input type="number" id="input-leak-ppm" step="10" value="400">
+                </div>
+            </div>
+            <button id="btn-save-cfg" class="btn btn-gold">Sauvegarder les Paramètres</button>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>SmartGas v1.0 • ESP32 Local-First • <span id="txt-uptime">Uptime: -- s</span></p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

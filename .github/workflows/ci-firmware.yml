@@ -1,0 +1,31 @@
+name: CI Firmware ESP32
+
+on:
+  push:
+    paths:
+      - 'firmware/**'
+      - '.github/workflows/ci-firmware.yml'
+  pull_request:
+    paths:
+      - 'firmware/**'
+
+jobs:
+  build-firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
+      - name: Verify compilation ESP32
+        run: |
+          cd firmware
+          pio run -e esp32dev

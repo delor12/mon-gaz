@@ -1,0 +1,60 @@
+{
+  "app": {
+    "title": "SMART GAS",
+    "subtitle": "Moniteur Intelligent GPL",
+    "footer": "SmartGas v1.0 • Sécurité Prioritaire Autonome • Local-First Architecture"
+  },
+  "status": {
+    "lan": "LAN (Direct)",
+    "cloud": "Cloud MQTT",
+    "demo": "Mode Démo",
+    "offline": "Hors Ligne"
+  },
+  "gauge": {
+    "gas_remaining": "Gaz restant",
+    "bottle_info": "Bouteille 12.5 kg • Cuisine Principale"
+  },
+  "metrics": {
+    "gross_weight": "Poids Brut Total",
+    "gas_ppm": "Concentration GPL",
+    "temperature": "Température",
+    "valve": "Électrovanne",
+    "valve_open": "OUVERTE",
+    "valve_closed": "FERMÉE"
+  },
+  "prediction": {
+    "title": "Estimation Prédictive d'Autonomie (IA)",
+    "end_date": "Fin : {{date}}",
+    "confidence": "(± {{hours}} h)",
+    "slow_leak_warning": "Attention : Décroissance de masse nocturne anormale observée. Suspicion de fuite lente !",
+    "nominal_recommendation": "Consommation nominale optimale.",
+    "urgent_refill": "Commande urgente recommandée : moins de 3 jours d'autonomie restante."
+  },
+  "actions": {
+    "close_valve": "Fermer Électrovanne",
+    "open_valve": "Ouvrir Électrovanne",
+    "tare": "Tare (0 kg)",
+    "calibrate": "Étalonner",
+    "mute": "Sourdine Buzzer (2 min)"
+  },
+  "alert": {
+    "danger_title": "! DANGER IMMÉDIAT !",
+    "leak_detected": "FUITE DE GAZ GPL DÉTECTÉE ({{ppm}} PPM)",
+    "auto_closed_note": "L'électrovanne a été automatiquement coupée pour votre sécurité.",
+    "safety_rules_title": "Consignes de Sécurité Vitales :",
+    "rule_1": "Ne touchez à AUCUN interrupteur électrique, flamme, ou appareil électronique.",
+    "rule_2": "Fermez immédiatement le robinet supérieur de la bouteille de gaz.",
+    "rule_3": "Ouvrez grandement les portes et fenêtres pour ventiler l'espace.",
+    "rule_4": "Évacuez le domicile si la concentration persiste et contactez les pompiers (18/112)."
+  },
+  "settings": {
+    "title": "Paramètres du Dispositif",
+    "demo_mode": "Mode Démo (Simulateur)",
+    "demo_subtitle": "Tester sans matériel réel connecté",
+    "demo_scenario": "Choisir un scénario simulé :",
+    "network_host": "Adresse Réseau de l'ESP32",
+    "save": "Enregistrer",
+    "calibration_title": "Étalonnage Cellule HX711",
+    "close": "Fermer"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "app": {
+    "title": "SMART GAS",
+    "subtitle": "Intelligent LPG Monitor",
+    "footer": "SmartGas v1.0 • Autonomous Safety Priority • Local-First Architecture"
+  },
+  "status": {
+    "lan": "LAN (Direct)",
+    "cloud": "Cloud MQTT",
+    "demo": "Demo Mode",
+    "offline": "Offline"
+  },
+  "gauge": {
+    "gas_remaining": "Remaining Gas",
+    "bottle_info": "12.5 kg Cylinder • Main Kitchen"
+  },
+  "metrics": {
+    "gross_weight": "Total Gross Weight",
+    "gas_ppm": "LPG Gas Level",
+    "temperature": "Temperature",
+    "valve": "Solenoid Valve",
+    "valve_open": "OPEN",
+    "valve_closed": "CLOSED"
+  },
+  "prediction": {
+    "title": "Predictive Autonomy Estimation (AI)",
+    "end_date": "Empty: {{date}}",
+    "confidence": "(± {{hours}} h)",
+    "slow_leak_warning": "Warning: Abnormal nightly weight drop observed. Slow leak suspected!",
+    "nominal_recommendation": "Optimal nominal consumption.",
+    "urgent_refill": "Urgent refill recommended: less than 3 days of autonomy remaining."
+  },
+  "actions": {
+    "close_valve": "Close Valve",
+    "open_valve": "Open Valve",
+    "tare": "Tare (0 kg)",
+    "calibrate": "Calibrate",
+    "mute": "Mute Buzzer (2 min)"
+  },
+  "alert": {
+    "danger_title": "! IMMEDIATE DANGER !",
+    "leak_detected": "LPG GAS LEAK DETECTED ({{ppm}} PPM)",
+    "auto_closed_note": "Solenoid valve automatically shut off for your safety.",
+    "safety_rules_title": "Vital Safety Instructions:",
+    "rule_1": "Do NOT touch any electrical switches, flames, or electronic appliances.",
+    "rule_2": "Immediately shut off the main valve on the gas cylinder.",
+    "rule_3": "Open all doors and windows wide to ventilate the area.",
+    "rule_4": "Evacuate the premises if gas odor persists and call emergency services (911/112)."
+  },
+  "settings": {
+    "title": "Device Settings",
+    "demo_mode": "Demo Mode (Simulator)",
+    "demo_subtitle": "Test features without real hardware",
+    "demo_scenario": "Choose a simulated scenario:",
+    "network_host": "ESP32 Network Host/IP",
+    "save": "Save",
+    "calibration_title": "HX711 Load Cell Calibration",
+    "close": "Close"
+  }
+}
