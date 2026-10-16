@@ -73,6 +73,19 @@ Conçue pour un rendu premium, élégant et ergonomique :
 
 ## 🚀 Guide de Démarrage et Lancement Pas à Pas
 
+### 🪟 Déploiement & Test Rapide sous Windows 10 / 11 (En 1 Clic)
+Si vous travaillez sur une machine Windows, vous disposez d'un lanceur interactif et d'outils de test dédiés :
+1. **Double-cliquez sur [`start-windows.bat`](file:///home/t-k-f-d-m/Documents/MonGaz/start-windows.bat)** à la racine du projet.
+2. Choisissez l'action souhaitée :
+   - **`[1] 🔌 Tester la Connexion Prototype`** : Détecte automatiquement les ports COM USB et interroge l'ESP32 en direct sur le Wi-Fi (affiche masse, fuite, vanne et permet de piloter la tare et l'électrovanne).
+   - **`[2] 🚀 Lancer Web + Simulateur`** : Démarre l'interface React et le simulateur en 5 secondes sur `http://localhost:3000`.
+   - **`[3] 🌐 Lancer Web connecté au Prototype Réel`** : Relie l'application Web directement à l'adresse IP de votre ESP32 sur votre réseau local.
+   - **`[4] ⚡ Flasher le Firmware`** : Compile et téléverse le code C++ et LittleFS sur l'ESP32 via PlatformIO.
+   - **`[5] 📟 Moniteur Série`** : Ouvre la console série à 115200 bauds.
+> 📖 Pour les détails d'installation des pilotes USB (CH340/CP2102) et du pare-feu Windows : consultez le [`docs/guide_deploiement_windows.md`](file:///home/t-k-f-d-m/Documents/MonGaz/docs/guide_deploiement_windows.md).
+
+---
+
 ### Méthode A : Test Rapide en Mode Démo (Sans Matériel Requis)
 Vous pouvez tester l'ensemble du système en moins de 30 secondes grâce au simulateur d'ESP32 inclus :
 

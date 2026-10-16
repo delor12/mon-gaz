@@ -38,11 +38,15 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_ESP32_HOST 
+          ? (process.env.VITE_ESP32_HOST.startsWith('http') ? process.env.VITE_ESP32_HOST : `http://${process.env.VITE_ESP32_HOST}`) 
+          : 'http://localhost:8080',
         changeOrigin: true
       },
       '/ws': {
-        target: 'ws://localhost:8080',
+        target: process.env.VITE_ESP32_HOST 
+          ? (process.env.VITE_ESP32_HOST.startsWith('ws') ? process.env.VITE_ESP32_HOST : `ws://${process.env.VITE_ESP32_HOST.replace(/^https?:\/\//, '')}`) 
+          : 'ws://localhost:8080',
         ws: true
       }
     }
