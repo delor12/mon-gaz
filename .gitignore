@@ -8,6 +8,8 @@ venv/
 # Build artifacts
 dist/
 web/dist/
+desktop/dist-electron/
+desktop/node_modules/
 build/
 mobile/build/
 .pio/

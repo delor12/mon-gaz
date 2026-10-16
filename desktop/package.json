@@ -1,0 +1,67 @@
+{
+  "name": "smartgas-desktop",
+  "productName": "SmartGas",
+  "version": "1.0.0",
+  "description": "Application Desktop Windows pour le système intelligent de surveillance de bouteille de gaz GPL",
+  "main": "main.cjs",
+  "author": "SmartGas Architecture Team",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win nsis portable --x64"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.smartgas.desktop",
+    "productName": "SmartGas",
+    "copyright": "Copyright © 2026 SmartGas Architecture Team",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "assets/**/*",
+      "../web/dist/**/*"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SMART GAS",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.exe"
+    }
+  },
+  "dependencies": {
+    "yallist": "^5.0.0"
+  }
+}

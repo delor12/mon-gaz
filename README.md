@@ -3,10 +3,11 @@
 [![CI Firmware](https://github.com/smartgas/smartgas/actions/workflows/ci-firmware.yml/badge.svg)](https://github.com/smartgas/smartgas/actions)
 [![CI Mobile](https://github.com/smartgas/smartgas/actions/workflows/ci-mobile.yml/badge.svg)](https://github.com/smartgas/smartgas/actions)
 [![CI Web](https://github.com/smartgas/smartgas/actions/workflows/ci-web.yml/badge.svg)](https://github.com/smartgas/smartgas/actions)
+[![CI Windows Desktop](https://github.com/delor12/mon-gaz/actions/workflows/ci-windows-desktop.yml/badge.svg)](https://github.com/delor12/mon-gaz/actions)
 [![CI Backend](https://github.com/smartgas/smartgas/actions/workflows/ci-backend.yml/badge.svg)](https://github.com/smartgas/smartgas/actions)
 
 Système embarqué IoT et distribué de monitoring continu pour bouteilles de gaz GPL (Butane / Propane) à destination des ménages et des professionnels.  
-Un boîtier à base d'**ESP32** mesure en permanence la masse de gaz restante via une cellule de charge **HX711** et surveille les fuites par capteur **MQ-6** avec alarme locale autonome et coupure automatique par électrovanne. Une application **Flutter** (Android/iOS) et une application **React 18 PWA** affichent les métriques en temps réel, prédisent l'autonomie restante par IA et alertent l'utilisateur.
+Un boîtier à base d'**ESP32** mesure en permanence la masse de gaz restante via une cellule de charge **HX711** et surveille les fuites par capteur **MQ-6** avec alarme locale autonome et coupure automatique par électrovanne. Une application **Desktop Windows (.exe)**, une application **Flutter** (Android/iOS) et une application **React 18 PWA** affichent les métriques en temps réel, prédisent l'autonomie restante par IA et alertent l'utilisateur.
 
 > **PRIORITÉ ABSOLUE : LA SÉCURITÉ**  
 > Une fuite de gaz est signalée et coupée immédiatement par le matériel (Buzzer 85 dB, LED stroboscopique, coupure électrovanne), **même si le Wi-Fi, Internet, le téléphone ou les applications sont indisponibles**.
@@ -18,11 +19,12 @@ Un boîtier à base d'**ESP32** mesure en permanence la masse de gaz restante vi
 ```text
 smartgas/
 ├── firmware/         # C++ PlatformIO ESP32 (FreeRTOS multi-tâches, LittleFS, TFT_eSPI)
+├── desktop/          # Application Desktop Windows native (.exe, Electron, System Tray, Alertes)
 ├── mobile/           # Flutter (iOS & Android, Riverpod, go_router, fl_chart)
 ├── web/              # React 18, TypeScript, Vite, PWA installable, Tailwind CSS
 ├── backend/          # Optionnel : Mosquitto MQTT TLS, FastAPI, TimescaleDB, Docker Compose
 ├── shared/           # Tokens de design partagés (Bleu/Or), schémas et simulateur
-├── docs/             # Documentation : guide de connexion ESP32, API OpenAPI, câblage, étalonnage
+├── docs/             # Documentation : guides de connexion, version desktop, API OpenAPI, câblage
 └── README.md
 ```
 
@@ -82,7 +84,11 @@ Si vous travaillez sur une machine Windows, vous disposez d'un lanceur interacti
    - **`[3] 🌐 Lancer Web connecté au Prototype Réel`** : Relie l'application Web directement à l'adresse IP de votre ESP32 sur votre réseau local.
    - **`[4] ⚡ Flasher le Firmware`** : Compile et téléverse le code C++ et LittleFS sur l'ESP32 via PlatformIO.
    - **`[5] 📟 Moniteur Série`** : Ouvre la console série à 115200 bauds.
-> 📖 Pour les détails d'installation des pilotes USB (CH340/CP2102) et du pare-feu Windows : consultez le [`docs/guide_deploiement_windows.md`](file:///home/t-k-f-d-m/Documents/MonGaz/docs/guide_deploiement_windows.md).
+   - **`[8] 🖥️ Lancer la Version Desktop Windows (.exe)`** : Démarre l'application Windows native avec surveillance en arrière-plan dans la barre des tâches (System Tray) et alertes de fuite prioritaires.
+   - **`[9] 📦 Compiler l'Exécutable Windows (.exe)`** : Génère les exécutables autonomes (.exe).
+> 📖 Guides Windows dédiés :
+> - Déploiement et tests prototype : [`docs/guide_deploiement_windows.md`](file:///home/t-k-f-d-m/Documents/MonGaz/docs/guide_deploiement_windows.md)
+> - Application Desktop native (.exe) : [`docs/guide_version_desktop_windows.md`](file:///home/t-k-f-d-m/Documents/MonGaz/docs/guide_version_desktop_windows.md)
 
 ---
 

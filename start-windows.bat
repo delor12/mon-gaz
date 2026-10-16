@@ -20,10 +20,12 @@ echo   [4] ⚡ Flasher le Firmware sur l'ESP32 via USB (PlatformIO)
 echo   [5] 📟 Ouvrir le Moniteur Série USB de l'ESP32 (115200 bauds)
 echo   [6] 🛠️ Installer / Vérifier les Dépendances (Node.js, Python, Libs)
 echo   [7] 📖 Ouvrir le Guide de Déploiement Windows (Documentation)
+echo   [8] 🖥️ Lancer la Version Desktop Windows (SmartGas.exe)
+echo   [9] 📦 Compiler l'Exécutable Windows (.exe)
 echo   [0] ❌ Quitter
 echo.
 echo =====================================================================
-set /p CHOICE="Entrez votre choix [0-7] : "
+set /p CHOICE="Entrez votre choix [0-9] : "
 
 if "%CHOICE%"=="1" goto TEST_CONNECTION
 if "%CHOICE%"=="2" goto LAUNCH_SIM_WEB
@@ -32,6 +34,8 @@ if "%CHOICE%"=="4" goto FLASH_FIRMWARE
 if "%CHOICE%"=="5" goto SERIAL_MONITOR
 if "%CHOICE%"=="6" goto INSTALL_DEPS
 if "%CHOICE%"=="7" goto OPEN_DOCS
+if "%CHOICE%"=="8" goto LAUNCH_DESKTOP
+if "%CHOICE%"=="9" goto BUILD_DESKTOP
 if "%CHOICE%"=="0" goto EXIT_SCRIPT
 
 echo.
@@ -249,6 +253,68 @@ goto MENU
 :: ---------------------------------------------------------
 :OPEN_DOCS
 start "" "%~dp0docs\guide_deploiement_windows.md"
+goto MENU
+
+:: ---------------------------------------------------------
+:: 8. LANCER LA VERSION DESKTOP WINDOWS
+:: ---------------------------------------------------------
+:LAUNCH_DESKTOP
+cls
+echo =====================================================================
+echo   🖥️ Lancement de SMART GAS Desktop (Application Windows Native)
+echo =====================================================================
+echo.
+if exist "%~dp0desktop\dist-electron\SmartGas-Portable-1.0.0.exe" (
+    echo Démarrage de SmartGas Portable (.exe)...
+    start "" "%~dp0desktop\dist-electron\SmartGas-Portable-1.0.0.exe"
+    goto MENU
+)
+if exist "%~dp0desktop\dist-electron\win-unpacked\SmartGas.exe" (
+    echo Démarrage de SmartGas (.exe)...
+    start "" "%~dp0desktop\dist-electron\win-unpacked\SmartGas.exe"
+    goto MENU
+)
+
+echo [INFO] Aucun binaire précompilé détecté dans dist-electron.
+echo Lancement de l'application Desktop en mode développement avec Electron...
+cd /d "%~dp0desktop"
+call npm start
+cd /d "%~dp0"
+pause
+goto MENU
+
+:: ---------------------------------------------------------
+:: 9. COMPILER L'EXÉCUTABLE WINDOWS (.EXE)
+:: ---------------------------------------------------------
+:BUILD_DESKTOP
+cls
+echo =====================================================================
+echo   📦 Compilation de l'Exécutable Windows (.exe)
+echo =====================================================================
+echo.
+echo 1. Compilation des sources Web (Vite + React)...
+cd /d "%~dp0web"
+call npm run build
+if %errorlevel% neq 0 (
+    echo ❌ Échec du build Web.
+    pause
+    goto MENU
+)
+
+echo.
+echo 2. Installation des modules Electron...
+cd /d "%~dp0desktop"
+call npm install
+
+echo.
+echo 3. Création des exécutables Windows (.exe) via Electron Builder...
+call npm run dist:win
+
+echo.
+echo ✅ Exécutables disponibles dans le dossier : desktop\dist-electron\
+echo.
+cd /d "%~dp0"
+pause
 goto MENU
 
 :EXIT_SCRIPT
