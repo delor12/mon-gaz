@@ -91,24 +91,34 @@ function Show-Dashboard($info) {
     Write-Host "└─────────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
 }
 
+param(
+    [string]$TargetHost = ""
+)
+
 # --- DÉBUT DU PROGRAMME ---
 Write-Banner
 Get-UsbSerialPorts
 
 Write-Host "--- 2. DÉTECTION DU PROTOTYPE RÉSEAU ---" -ForegroundColor Yellow
-Write-Host "Test de l'adresse mDNS (smartgas.local)..." -NoNewline
-$result = Test-EspEndpoint "smartgas.local"
 
-if (-not $result.Success) {
-    Write-Host " [Injoignable]" -ForegroundColor DarkGray
-    Write-Host "Test du simulateur local (localhost:8080)..." -NoNewline
-    $result = Test-EspEndpoint "localhost:8080"
+if ($TargetHost -ne "") {
+    Write-Host "Test de l'adresse spécifiée ($TargetHost)..." -NoNewline
+    $result = Test-EspEndpoint $TargetHost
+} else {
+    Write-Host "Test de l'adresse mDNS (smartgas.local)..." -NoNewline
+    $result = Test-EspEndpoint "smartgas.local"
+    
+    if (-not $result.Success) {
+        Write-Host " [Injoignable]" -ForegroundColor DarkGray
+        Write-Host "Test du simulateur local (localhost:8080)..." -NoNewline
+        $result = Test-EspEndpoint "localhost:8080"
+    }
 }
 
 if (-not $result.Success) {
     Write-Host " [Injoignable]" -ForegroundColor DarkGray
     Write-Host ""
-    $manual = Read-Host "Entrez l'adresse IP de votre ESP32 (ex: 192.168.1.50) ou appuyez sur Entrée pour réessayer"
+    $manual = Read-Host "Entrez l'adresse IP de votre ESP32 (ex: 192.168.1.192) ou appuyez sur Entrée pour réessayer"
     if ($manual) {
         $result = Test-EspEndpoint $manual
     }

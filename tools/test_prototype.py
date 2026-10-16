@@ -235,7 +235,15 @@ def main():
 
     # 2. Vérification de la liaison Réseau Wi-Fi / REST API
     print("\n--- 2. VÉRIFICATION DE LA LIAISON RÉSEAU (ESP32 WI-FI / LAN) ---")
-    host, data = scan_local_network_for_smartgas()
+    if len(sys.argv) > 1 and sys.argv[1].strip():
+        host = sys.argv[1].strip()
+        print(f"  [*] Cible spécifiée en paramètre : {host}")
+        ok, data, dt, err = test_http_endpoint(host)
+        if not ok:
+            print(f"  ❌ Impossible de joindre http://{host}/api/v1/data ({err})")
+            host = None
+    else:
+        host, data = scan_local_network_for_smartgas()
 
     if not host:
         print("\n  ⚠️ Détection automatique par mDNS (smartgas.local) non immédiate.")
