@@ -28,6 +28,12 @@ jobs:
           npm ci
           npm run build
 
+      - name: Copy Web Dist to Desktop
+        run: |
+          mkdir -p desktop/web-dist
+          cp -r web/dist/* desktop/web-dist/
+        shell: bash
+
       - name: Install Desktop Dependencies
         working-directory: ./desktop
         run: |

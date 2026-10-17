@@ -10,6 +10,7 @@ dist/
 web/dist/
 desktop/dist-electron/
 desktop/node_modules/
+desktop/web-dist/
 build/
 mobile/build/
 .pio/

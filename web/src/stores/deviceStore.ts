@@ -185,10 +185,17 @@ export const useDeviceStore = create<DeviceStoreState>((set, get) => {
       if (get().isDemo) return;
 
       const customHost = localStorage.getItem('sg_device_host');
+      let host = customHost;
+      if (!host) {
+        if (typeof window !== 'undefined' && (window.location.protocol === 'file:' || !window.location.host)) {
+          host = '127.0.0.1:8080';
+        } else {
+          host = window.location.host || '127.0.0.1:8080';
+        }
+      }
+      host = host.replace(/^https?:\/\//, '');
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = customHost 
-        ? `${wsProtocol}//${customHost}/ws` 
-        : `${wsProtocol}//${window.location.host}/ws`;
+      const wsUrl = `${wsProtocol}//${host}/ws`;
 
       try {
         ws = new WebSocket(wsUrl);

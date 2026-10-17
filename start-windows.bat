@@ -302,12 +302,19 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo 2. Installation des modules Electron...
+echo 2. Synchronisation des fichiers Web vers le module Desktop...
+cd /d "%~dp0"
+if exist "desktop\web-dist" rmdir /s /q "desktop\web-dist"
+mkdir "desktop\web-dist"
+xcopy /e /i /y "web\dist" "desktop\web-dist"
+
+echo.
+echo 3. Installation des modules Electron...
 cd /d "%~dp0desktop"
 call npm install
 
 echo.
-echo 3. Création des exécutables Windows (.exe) via Electron Builder...
+echo 4. Création des exécutables Windows (.exe) via Electron Builder...
 call npm run dist:win
 
 echo.

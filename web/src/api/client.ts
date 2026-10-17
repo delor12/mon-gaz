@@ -3,7 +3,13 @@ import { TelemetryData, HistoryResponse, DeviceConfig } from '../types/telemetry
 export class ApiService {
   private static getBaseUrl(): string {
     const customHost = localStorage.getItem('sg_device_host');
-    if (customHost) return `http://${customHost}/api/v1`;
+    if (customHost) {
+      const host = customHost.startsWith('http') ? customHost : `http://${customHost}`;
+      return `${host}/api/v1`;
+    }
+    if (typeof window !== 'undefined' && (window.location.protocol === 'file:' || !window.location.host)) {
+      return 'http://127.0.0.1:8080/api/v1';
+    }
     return '/api/v1';
   }
 
